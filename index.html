@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digital Busy Board</title>
+    <style>
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2%;
+            width: 30%;
+            margin: 5% auto;
+            left: 70%;
+        }
+
+        .grid-button {
+            aspect-ratio: 1;
+            font-size: 2vw;
+            border: 0.3vw solid #333;
+            border-radius: 1.5vw;
+            cursor: pointer;
+            background-color: #fff;
+            transition: background-color 0.3s;
+        }
+
+        .radio-grid-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2%;
+            width: 15%;
+            margin: 2%;
+            position: absolute;
+            top: 1%;
+            left: 1%;
+        }
+
+        .radio-button {
+            width: 100%;
+            height: 7vw;
+            cursor: pointer;
+        }
+
+        .start-over-button {
+            position: absolute;
+            top: 2%;
+            right: 2%;
+            padding: 1vw 2vw;
+            font-size: 2vw;
+            cursor: pointer;
+            background-color: #f00;
+            color: #fff;
+            border: none;
+            border-radius: 1vw;
+        }
+
+        .thumbstick-container {
+            position: absolute;
+            right: 5%;
+            top: 40%;
+            transform: translateY(-50%);
+            width: 20vw;
+            height: 20vw;
+            background-color: #333;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .thumbstick {
+            width: 16vw; /* Twice as wide */
+            height: 16vw; /* Twice as wide */
+            background-color: #ccc;
+            border-radius: 50%;
+            position: absolute;
+            cursor: pointer;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .piano-container {
+            position: absolute;
+            bottom: 5%;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: flex-end;
+            width: 80%;
+        }
+
+        .white-key, .black-key {
+            border: 0.1vw solid #000;
+            cursor: pointer;
+            user-select: none;
+            transition: background-color 0.1s;
+        }
+
+        .white-key {
+            width: 8%; /* Twice as wide */
+            height: 25vw; /* 25% taller */
+            background-color: #fff;
+            z-index: 1;
+        }
+
+        .black-key {
+            width: 6%; /* Twice as wide */
+            height: 17.5vw; /* 25% taller */
+            background-color: #000;
+            margin-left: -3%; /* Adjust for new width */
+            margin-right: -3%; /* Adjust for new width */
+            z-index: 2;
+            position: relative;
+            top: -8vw; /* Top aligned */
+        }
+
+        .black-key:nth-child(3), .black-key:nth-child(7) {
+            margin-right: -3%; /* Ensure overlap */
+        }
+
+        .key-pressed {
+            background-color: gray !important;
+        }
+
+        .toggle-container {
+            position: absolute;
+            left: 5%;
+            top: 40%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 1vw; /* Double the gap */
+        }
+
+        .toggle-button {
+            width: 10vw; /* Double the width */
+            height: 6vw; /* Double the height */
+            background-color: #ccc;
+            border: 0.2vw solid #333;
+            border-radius: 5vw; /* Adjust for new size */
+            cursor: pointer;
+            position: relative;
+            transition: background-color 0.3s;
+        }
+
+        .toggle-button::before {
+            content: '';
+            position: absolute;
+            width: 4vw; /* Double the width */
+            height: 4vw; /* Double the height */
+            background-color: #fff;
+            border-radius: 50%;
+            top: 1vw; /* Adjust for new size */
+            left: 1vw; /* Adjust for new size */
+            transition: left 0.3s;
+        }
+
+        .toggle-button.red.active {
+            background-color: #f00;
+        }
+
+        .toggle-button.red.active::before {
+            left: 5vw; /* Adjust for new size */
+        }
+
+        .toggle-button.blue.active {
+            background-color: #00f;
+        }
+
+        .toggle-button.blue.active::before {
+            left: 5vw; /* Adjust for new size */
+        }
+
+        .toggle-button.green.active {
+            background-color: #0f0;
+        }
+
+        .toggle-button.green.active::before {
+            left: 5vw; /* Adjust for new size */
+        }
+
+        .jog-wheel-container {
+            position: absolute;
+            bottom: 5%;
+            right: 0%;
+            transform: translateX(-50%);
+            width: 20vw;
+            height: 20vw;
+            background-color: #333;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .jog-wheel {
+            width: 18vw;
+            height: 18vw;
+            background-color: #ccc;
+            border-radius: 50%;
+            position: relative;
+        }
+
+        .jog-wheel::before {
+            content: '';
+            position: absolute;
+            width: 0.2vw;
+            height: 100%;
+            background-color: #333;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .jog-wheel::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 0.2vw;
+            background-color: #333;
+            top: 50%;
+            left: 0;
+            transform: translateY(-50%);
+        }
+
+        body {
+            -webkit-user-select: none; /* Disable text selection on mobile */
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            font-family: sans-serif; /* Update font to sans-serif */
+        }
+
+        .grid-button, .radio-button, .start-over-button, .thumbstick, .white-key, .black-key, .toggle-button, .jog-wheel-container {
+            -webkit-user-select: none; /* Disable text selection */
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+
+        .abc-scroll-container {
+            position: absolute;
+            left: 22%;
+            top: 7%;
+            width: 10%;
+            height: 40%;
+            overflow-y: scroll; /* Enable vertical scrolling */
+            display: flex;
+            align-items: top;
+            background-color: #f0f0f0; /* Add background color */
+            border: 1px solid #ccc; /* Add border */
+            border-radius: 10px; /* Add border radius */
+        }
+
+        .abc-scroll {
+            width: 100%;
+            height:100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-size: 4vw;
+            cursor: pointer;
+            user-select: none;
+            transition: transform 0.3s;
+
+            
+        }
+
+        .abc-item {
+            height: 4vw;
+            display: flex;
+            align-items: center;
+        }
+    </style>
+</head>
+<body>
+    <button class="start-over-button" onclick="location.reload()">Start Over</button>
+    <div class="radio-grid-container">
+        <input type="radio" id="radio1" name="radio-group" class="radio-button">
+        <input type="radio" id="radio2" name="radio-group" class="radio-button">
+        <input type="radio" id="radio3" name="radio-group" class="radio-button">
+        <input type="radio" id="radio4" name="radio-group" class="radio-button">
+    </div>
+    <div class="grid-container">
+        <button class="grid-button">1</button>
+        <button class="grid-button">2</button>
+        <button class="grid-button">3</button>
+        <button class="grid-button">4</button>
+        <button class="grid-button">5</button>
+        <button class="grid-button">6</button>
+        <button class="grid-button">7</button>
+        <button class="grid-button">8</button>
+        <button class="grid-button">9</button>
+    </div>
+    <div class="abc-scroll-container" id="abcScrollContainer">
+        <div class="abc-scroll" id="abcScroll">
+            <div class="abc-item">A</div>
+            <div class="abc-item">B</div>
+            <div class="abc-item">C</div>
+            <div class="abc-item">D</div>
+            <div class="abc-item">E</div>
+            <div class="abc-item">F</div>
+            <div class="abc-item">G</div>
+            <div class="abc-item">H</div>
+            <div class="abc-item">I</div>
+            <div class="abc-item">J</div>
+            <div class="abc-item">K</div>
+            <div class="abc-item">L</div>
+            <div class="abc-item">M</div>
+            <div class="abc-item">N</div>
+            <div class="abc-item">O</div>
+            <div class="abc-item">P</div>
+            <div class="abc-item">Q</div>
+            <div class="abc-item">R</div>
+            <div class="abc-item">S</div>
+            <div class="abc-item">T</div>
+            <div class="abc-item">U</div>
+            <div class="abc-item">V</div>
+            <div class="abc-item">W</div>
+            <div class="abc-item">X</div>
+            <div class="abc-item">Y</div>
+            <div class="abc-item">Z</div>
+        </div>
+    </div>
+    <div class="thumbstick-container">
+        <div class="thumbstick" id="thumbstick"></div>
+    </div>
+    <div class="piano-container">
+        <div class="white-key" data-note="C4"></div>
+        <div class="black-key" data-note="C#4"></div>
+        <div class="white-key" data-note="D4"></div>
+        <div class="black-key" data-note="D#4"></div>
+        <div class="white-key" data-note="E4"></div>
+        <div class="white-key" data-note="F4"></div>
+        <div class="black-key" data-note="F#4"></div>
+        <div class="white-key" data-note="G4"></div>
+        <div class="black-key" data-note="G#4"></div>
+        <div class="white-key" data-note="A4"></div>
+        <div class="black-key" data-note="A#4"></div>
+        <div class="white-key" data-note="B4"></div>
+        <div class="white-key" data-note="C5"></div>
+    </div>
+    <div class="toggle-container">
+        <div class="toggle-button red" id="toggle1"></div>
+        <div class="toggle-button blue" id="toggle2"></div>
+        <div class="toggle-button green" id="toggle3"></div>
+    </div>
+    <div class="jog-wheel-container">
+        <div class="jog-wheel" id="jogWheel"></div>
+    </div>
+    <script>
+        function getRandomColor() {
+            const letters = '0123456789ABCDEF';
+            let color = '#';
+            for (let i = 0; i < 6; i++) {
+                color += letters[Math.floor(Math.random() * 16)];
+            }
+            return color;
+        }
+
+        document.querySelectorAll('.grid-button').forEach(button => {
+            button.addEventListener('click', function() {
+                this.style.backgroundColor = getRandomColor();
+            });
+        });
+
+        const thumbstick = document.getElementById('thumbstick');
+        const container = document.querySelector('.thumbstick-container');
+        let isDragging = false;
+
+        thumbstick.addEventListener('mousedown', function(e) {
+            isDragging = true;
+        });
+
+        thumbstick.addEventListener('touchstart', function(e) {
+            isDragging = true;
+        });
+
+        document.addEventListener('mouseup', function() {
+            isDragging = false;
+            thumbstick.style.left = '50%';
+            thumbstick.style.top = '50%';
+        });
+
+        document.addEventListener('touchend', function() {
+            isDragging = false;
+            thumbstick.style.left = '50%';
+            thumbstick.style.top = '50%';
+        });
+
+        document.addEventListener('mousemove', function(e) {
+            if (isDragging) {
+                const rect = container.getBoundingClientRect();
+                const x = e.clientX - rect.left - rect.width / 2;
+                const y = e.clientY - rect.top - rect.height / 2;
+                const distance = Math.sqrt(x * x + y * y);
+                const maxDistance = rect.width / 2 - thumbstick.offsetWidth / 2 + 2; // Allow going beyond
+
+                if (distance < maxDistance) {
+                    thumbstick.style.left = `${x + rect.width / 2}px`;
+                    thumbstick.style.top = `${y + rect.height / 2}px`;
+                } else {
+                    const angle = Math.atan2(y, x);
+                    thumbstick.style.left = `${Math.cos(angle) * maxDistance + rect.width / 2}px`;
+                    thumbstick.style.top = `${Math.sin(angle) * maxDistance + rect.height / 2}px`;
+                }
+            }
+        });
+
+        document.addEventListener('touchmove', function(e) {
+            if (isDragging) {
+                const touch = e.touches[0];
+                const rect = container.getBoundingClientRect();
+                const x = touch.clientX - rect.left - rect.width / 2;
+                const y = touch.clientY - rect.top - rect.height / 2;
+                const distance = Math.sqrt(x * x + y * y);
+                const maxDistance = rect.width / 2 - thumbstick.offsetWidth / 2 + 2; // Allow going beyond
+
+                if (distance < maxDistance) {
+                    thumbstick.style.left = `${x + rect.width / 2}px`;
+                    thumbstick.style.top = `${y + rect.height / 2}px`;
+                } else {
+                    const angle = Math.atan2(y, x);
+                    thumbstick.style.left = `${Math.cos(angle) * maxDistance + rect.width / 2}px`;
+                    thumbstick.style.top = `${Math.sin(angle) * maxDistance + rect.height / 2}px`;
+                }
+            }
+        });
+
+        function playNote(note) {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+
+            const frequencies = {
+                'C4': 261.63,
+                'C#4': 277.18,
+                'D4': 293.66,
+                'D#4': 311.13,
+                'E4': 329.63,
+                'F4': 349.23,
+                'F#4': 369.99,
+                'G4': 392.00,
+                'G#4': 415.30,
+                'A4': 440.00,
+                'A#4': 466.16,
+                'B4': 493.88,
+                'C5': 523.25
+            };
+
+            oscillator.type = 'sine';
+            oscillator.frequency.setValueAtTime(frequencies[note], audioContext.currentTime);
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+
+            oscillator.start();
+            gainNode.gain.exponentialRampToValueAtTime(0.0001, audioContext.currentTime + 1);
+            oscillator.stop(audioContext.currentTime + 1);
+        }
+
+        document.querySelectorAll('.white-key, .black-key').forEach(key => {
+            key.addEventListener('mousedown', function() {
+                this.classList.add('key-pressed');
+                playNote(this.dataset.note);
+            });
+
+            key.addEventListener('touchstart', function() {
+                this.classList.add('key-pressed');
+                playNote(this.dataset.note);
+            });
+
+            key.addEventListener('mouseup', function() {
+                this.classList.remove('key-pressed');
+            });
+
+            key.addEventListener('touchend', function() {
+                this.classList.remove('key-pressed');
+            });
+
+            key.addEventListener('mouseleave', function() {
+                this.classList.remove('key-pressed');
+            });
+
+            key.addEventListener('touchcancel', function() {
+                this.classList.remove('key-pressed');
+            });
+        });
+
+        document.querySelectorAll('.toggle-button').forEach(button => {
+            button.addEventListener('click', function() {
+                this.classList.toggle('active');
+            });
+
+            button.addEventListener('touchstart', function() {
+                this.classList.toggle('active');
+            });
+        });
+
+        const jogWheel = document.getElementById('jogWheel');
+        let isSpinning = false;
+        let startAngle = 0;
+
+        jogWheel.addEventListener('mousedown', function(e) {
+            isSpinning = true;
+            const rect = jogWheel.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+            const x = e.clientX - centerX;
+            const y = e.clientY - centerY;
+            startAngle = Math.atan2(y, x);
+        });
+
+        jogWheel.addEventListener('touchstart', function(e) {
+            isSpinning = true;
+            const touch = e.touches[0];
+            const rect = jogWheel.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+            const x = touch.clientX - centerX;
+            const y = touch.clientY - centerY;
+            startAngle = Math.atan2(y, x);
+        });
+
+        document.addEventListener('mouseup', function() {
+            isSpinning = false;
+        });
+
+        document.addEventListener('touchend', function() {
+            isSpinning = false;
+        });
+
+        document.addEventListener('mousemove', function(e) {
+            if (isSpinning) {
+                const rect = jogWheel.getBoundingClientRect();
+                const centerX = rect.left + rect.width / 2;
+                const centerY = rect.top + rect.height / 2;
+                const x = e.clientX - centerX;
+                const y = e.clientY - centerY;
+                const angle = Math.atan2(y, x);
+                const deltaAngle = angle - startAngle;
+                jogWheel.style.transform = `rotate(${deltaAngle}rad)`;
+            }
+        });
+
+        document.addEventListener('touchmove', function(e) {
+            if (isSpinning) {
+                const touch = e.touches[0];
+                const rect = jogWheel.getBoundingClientRect();
+                const centerX = rect.left + rect.width / 2;
+                const centerY = rect.top + rect.height / 2;
+                const x = touch.clientX - centerX;
+                const y = touch.clientY - centerY;
+                const angle = Math.atan2(y, x);
+                const deltaAngle = angle - startAngle;
+                jogWheel.style.transform = `rotate(${deltaAngle}rad)`;
+            }
+        });
+
+        const abcScrollContainer = document.getElementById('abcScrollContainer');
+        const abcScroll = document.getElementById('abcScroll');
+        let startY = 0;
+        let scrollY = 0;
+
+        abcScrollContainer.addEventListener('mousedown', function(e) {
+            startY = e.clientY;
+            abcScroll.style.transition = 'none';
+        });
+
+        abcScrollContainer.addEventListener('touchstart', function(e) {
+            startY = e.touches[0].clientY;
+            abcScroll.style.transition = 'none';
+        });
+
+        abcScrollContainer.addEventListener('mouseup', function() {
+            abcScroll.style.transition = 'transform 0.3s';
+        });
+
+        abcScrollContainer.addEventListener('touchend', function() {
+            abcScroll.style.transition = 'transform 0.3s';
+        });
+
+        abcScrollContainer.addEventListener('mousemove', function(e) {
+            if (startY !== 0) {
+                const deltaY = e.clientY - startY;
+                scrollY += deltaY;
+                startY = e.clientY;
+                abcScrollContainer.scrollTop -= deltaY;
+            }
+        });
+
+        abcScrollContainer.addEventListener('touchmove', function(e) {
+            if (startY !== 0) {
+                const deltaY = e.touches[0].clientY - startY;
+                scrollY += deltaY;
+                startY = e.touches[0].clientY;
+                abcScrollContainer.scrollTop -= deltaY;
+            }
+        });
+
+        // Initialize scroll position to show ABCD
+        window.addEventListener('load', function() {
+            abcScrollContainer.scrollTop = 0;
+        });
+    </script>
+</body>
+</html>
