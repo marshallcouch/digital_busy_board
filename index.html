@@ -412,7 +412,7 @@
                 const x = e.clientX - rect.left - rect.width / 2;
                 const y = e.clientY - rect.top - rect.height / 2;
                 const distance = Math.sqrt(x * x + y * y);
-                const maxDistance = rect.width / 2 - thumbstick.offsetWidth / 2 + 2; // Allow going beyond
+                const maxDistance = rect.width /2.5; // Allow going beyond
 
                 if (distance < maxDistance) {
                     thumbstick.style.left = `${x + rect.width / 2}px`;
@@ -432,7 +432,7 @@
                 const x = touch.clientX - rect.left - rect.width / 2;
                 const y = touch.clientY - rect.top - rect.height / 2;
                 const distance = Math.sqrt(x * x + y * y);
-                const maxDistance = rect.width / 2 - thumbstick.offsetWidth / 2 + 2; // Allow going beyond
+                const maxDistance = rect.width / 2.5 ; // Allow going beyond
 
                 if (distance < maxDistance) {
                     thumbstick.style.left = `${x + rect.width / 2}px`;
